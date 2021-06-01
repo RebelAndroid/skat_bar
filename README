@@ -1,1 +1,25 @@
-A card game created by me and my friend
+Skat Bar is a trick taking card game created by me and my friends.
+
+Dealing:
+  2 players - both players get 9 cards and 2 piles of 2 cards are placed face down on the table (these are the "Skat Bars").
+  3 players - each player gets 6 cards and 2 piles of 2 cards are placed face down on the table.
+  4 players - each player gets 5 cards and 2 cards are placed face down on the table.
+
+Rules:
+  Skat Bar uses the opposite of a skat deck: twos through sixes and the 2 jokers.
+  Both jokers are always Trump and are the highest cards. The black and white joker (the "guarantee") is higher.
+  Trump is a color and even or odd. (so red even, red odd, black even, or black odd)
+  The player to the left of the dealer chooses one part of trump. (red, black, odd, or even)
+  The next player chooses the other part of trump. (in 2 player Skat Bar, this is the dealer).
+  The next player starts the first trick.
+  In a trick, play moves left.
+  You must follow suit if you can.
+  Within a suit higher number cards win against lower number cards.
+  If a joker is played the player who played the lowest card in the trick may swap cards in their hand for cards in one of the Skat Bars.
+  If both jokers are played, the players who played the 2 lowest cards each choose a Skat Bar to swap from.
+  Ties are resolved with the following suit order: Clubs > Spades > Hearts > Diamond
+Scoring:
+  The player who wins the trick takes all the cards in the trick.
+  Players get points for every card they take.
+  The jokers are worth 4 points, every other card is worth it's number.
+  The player with the most points wins.
