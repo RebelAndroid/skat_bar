@@ -2,6 +2,8 @@ use rand::{Rng, seq::SliceRandom};
 use rand::thread_rng;
 use text_io::read;
 use std::cmp::Ordering;
+use colored::*;
+
 
 fn main() {
     println!("Skat Bar!");    
@@ -30,26 +32,27 @@ fn main() {
 
     // choose trump, computer dealt so player chooses first
     loop{
-        println!("Your hand is {:?}", player_hand);
+        print!("Your hand is: ");
+        cards_print(&player_hand);
         println!("choose trump (red/black/odd/even)");
         let trump: String = read!("{}\n");
-        if trump == "r"{
+        if trump == "r" || trump == "red"{
             trump_red = true;
             // TODO: make the computer choose trump intelligently
             trump_even = rng.gen_bool(0.5);
             break;
         }
-        if trump == "b"{
+        if trump == "b" || trump == "black"{
             trump_red = false;
             trump_even = rng.gen_bool(0.5);
             break;
         }
-        if trump == "o"{
+        if trump == "o" || trump == "odd"{
             trump_even = false;
             trump_red = rng.gen_bool(0.5);
             break;
         }
-        if trump == "e"{
+        if trump == "e" || trump == "even"{
             trump_even = true;
             trump_red = rng.gen_bool(0.5);
             break;
@@ -63,8 +66,8 @@ fn main() {
     let mut computer_points = 0;
 
     // in two player skat bar the player that didn't deal goes first
-    // in this computer version the computer is always treated as going first
-    let player_starts = true;
+    // in this computer version the computer is always treated as dealing
+    let mut player_starts = true;
 
     loop{
         if player_hand.is_empty(){
@@ -74,19 +77,25 @@ fn main() {
         let mut trick = Vec::<&str>::new();
 
         if player_starts{
-            println!("Your hand is {:?}", player_hand);
-            println!("what card would you like to play 0-{}", player_hand.len() - 1);
-            let card_chosen: i32 = read!();
-            if card_chosen < 0 || card_chosen >= player_hand.len() as i32{
-                println!("invalid index!");
-                continue;
+            print!("Your hand is: ");
+            cards_print(&player_hand);
+            let mut card_chosen: i32;
+            loop{
+                println!("what card would you like to play 1-{}", player_hand.len());
+                card_chosen = read!();
+                card_chosen -= 1;
+                if card_chosen < 0 || card_chosen >= player_hand.len() as i32{
+                    println!("invalid index!");
+                    continue;
+                }
+                trick.push(player_hand.remove(card_chosen as usize));
+                break;
             }
-            trick.push(player_hand.remove(card_chosen as usize));
             
             if is_trump(trick[0], trump_red, trump_even){
                 // if the player plays trump, the computer must follow suit
                 for i in 0..(computer_hand.len()-1){
-                    if is_trump(computer_hand[0], trump_red, trump_even){
+                    if is_trump(computer_hand[i], trump_red, trump_even){
                         trick.push(computer_hand.remove(i));
                         break;
                     }
@@ -114,6 +123,9 @@ fn main() {
         }else{
             // computer chooses first
             trick.push(computer_hand.remove(0));
+            print!("computer chose card: ");
+            cards_print(&trick);
+            println!(""); // clear line
             let suit = trick[0].chars().nth(0).unwrap();
             // whether or not the player can follow suit
             let mut can_follow = false;
@@ -130,6 +142,30 @@ fn main() {
                     }
                 }
             }
+            print!("Your hand is: ");
+            cards_print(&player_hand);
+            let mut card_chosen: i32;
+            loop{
+                println!("what card would you like to play 1-{}", player_hand.len());
+                card_chosen = read!();
+                card_chosen -= 1;
+                if card_chosen < 0 || card_chosen >= player_hand.len() as i32{
+                    println!("invalid index!");
+                    continue;
+                }
+                if can_follow{
+                    if is_trump(trick[0], trump_red, trump_even) && !is_trump(player_hand[card_chosen as usize], trump_red, trump_even){
+                        println!("computer played trump, so you must also play trump");
+                        continue;
+                    }
+                    if player_hand[card_chosen as usize].chars().nth(0).unwrap() != suit{
+                        println!("You must follow suit");
+                        continue;
+                    }
+                }
+                trick.push(player_hand.remove(card_chosen as usize));
+                break;
+            }
         }
         // evaluate trick
 
@@ -139,26 +175,31 @@ fn main() {
         let order = compare_cards(trick[0], trick[1], trump_red, trump_even, suit);
         // number of points won in trick
         let trick_points = points(trick[0]) + points(trick[1]);
-        println!("Trick: {:?}", trick);
+        print!("Trick: ");
+        cards_print(&trick);
         if order == Ordering::Greater{
             if player_starts{
                 // player wins trick
                 println!("player wins trick");
                 player_points += trick_points;
+                // player_starts = true
             }else{
                 // computer wins trick
                 println!("computer wins trick");
                 computer_points += trick_points;
+                // player_starts = false
             }
         }else if order == Ordering::Less{
             if player_starts{
                 // player loses trick
                 println!("computer wins trick");
                 computer_points += trick_points;
+                player_starts = false;
             }else{
                 // player wins trick
                 println!("player wins trick");
                 player_points += trick_points;
+                player_starts = true;
             }
         }else{
             panic!("equal cards!: {}, {}", trick[0], trick[1]);
@@ -274,6 +315,21 @@ fn is_trump(card: &str, trump_red: bool, trump_even: bool) -> bool{
     return true;
 
 }
+
+fn cards_print(cards: &Vec<&str>){
+    for card in cards{
+        print!("{} ", card_print(*card));
+    }
+}
+
+
+fn card_print(card: &str) -> ColoredString{
+    if card.chars().nth(0).unwrap() == 'H' || card.chars().nth(0).unwrap() == 'D'{
+        return card.red().on_white();
+    }
+    return card.black().on_white();
+}
+
 
 fn get_deck() -> [String; 22] {
     let mut rng = thread_rng();
