@@ -121,7 +121,7 @@ fn main() {
                 }
             }
         }else{
-            // computer chooses first
+            // computer plays first
             trick.push(computer_hand.remove(0));
             print!("computer chose card: ");
             cards_print(&trick);
@@ -177,6 +177,52 @@ fn main() {
         let trick_points = points(trick[0]) + points(trick[1]);
         print!("Trick: ");
         cards_print(&trick);
+
+        // check for skat bar
+        if (player_starts && (trick[1] == "G" || trick[1] == "J")) || (!player_starts && (trick[0] == "G" || trick[0] == "J")){
+            let mut skat_bar_chosen: i32;
+            loop{
+                println!("which skat-bar would you like to pick up? (1 or 2)");
+                skat_bar_chosen = read!();
+                if skat_bar_chosen < 1 || skat_bar_chosen > 2{
+                    println!("please select 1 or 2");
+                    continue;
+                }
+                break;   
+            }
+            if skat_bar_chosen == 1{
+                player_hand.append(&mut skat_bar1);
+            }else if skat_bar_chosen == 2{
+                player_hand.append(&mut skat_bar2);
+            }else{
+                panic!("invalid skat bar");
+            }
+            println!("now that the skat bar has been replaced, select 2 cards from your hand to place back in the skat-bar");
+            let mut card_chosen: i32;
+            for _i in 0..2{
+                loop{
+                    print!("Your hand is: ");
+                    cards_print(&player_hand);
+                    println!("what card would you like to remove 1-{}", player_hand.len());
+                    card_chosen = read!();
+                    card_chosen -= 1;
+                    if card_chosen < 0 || card_chosen >= player_hand.len() as i32{
+                        println!("invalid index!");
+                        continue;
+                    }
+                    if skat_bar_chosen == 1{
+                        skat_bar1.push(player_hand.remove(card_chosen as usize));
+                        break;
+                    }else if skat_bar_chosen == 2{
+                        skat_bar2.push(player_hand.remove(card_chosen as usize));
+                        break;
+                    }else{
+                        panic!("invalid skat bar");
+                    }
+                }
+            }
+        }
+
         if order == Ordering::Greater{
             if player_starts{
                 // player wins trick
@@ -204,6 +250,7 @@ fn main() {
         }else{
             panic!("equal cards!: {}, {}", trick[0], trick[1]);
         }
+        
     }
 
     println!("Player points: {}, Computer Points: {}", player_points, computer_points);
