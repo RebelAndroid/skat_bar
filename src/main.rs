@@ -269,7 +269,7 @@ fn main() {
 fn points(card: &str) -> i32{
     // the guarantee and joker are worth 4 points
     if card == "G" || card == "J"{
-        return 4;
+        return 2;
     }
     // the other cards are worth their number
     return card.chars().nth(1).unwrap().to_digit(10).unwrap() as i32;
